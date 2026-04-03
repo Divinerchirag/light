@@ -1,0 +1,198 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #050505;
+  --color-foreground: #ffffff;
+  --color-bg-hero: #0a0a0a;
+  --color-fg-hero: #f5f0e8;
+  --color-accent: #f97316;
+  --color-muted-hero: #5a5550;
+  --color-card-hero: #141414;
+  --color-border-hero: rgba(255, 255, 255, 0.07);
+
+  --font-outfit: var(--font-outfit);
+  --font-jakarta: var(--font-jakarta);
+  --font-playfair: var(--font-playfair);
+  --blur-xs: 2px;
+
+  --animate-fade-up: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-slide-up: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-slide-down: slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+  @keyframes fadeUp {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideUp {
+    0% {
+      opacity: 0;
+      transform: translateY(38px);
+    }
+
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideDown {
+    0% {
+      opacity: 0;
+      transform: translateY(-16px);
+    }
+
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+@layer base {
+
+  /* ── Light theme (default) ── */
+  [data-theme="light"],
+  :root {
+    --bg: #f8f5f0;
+    --bg-secondary: #ffffff;
+    --fg: #1a1512;
+    --fg-secondary: #6b5f55;
+    --accent: #f97316;
+    --accent-hover: #ea6c10;
+    --muted: #9b8f85;
+    --card: #ffffff;
+    --card-hover: #fdf9f6;
+    --border: rgba(0, 0, 0, 0.08);
+    --border-hover: rgba(0, 0, 0, 0.16);
+    --nav-bg: rgba(255, 255, 255, 0.65);
+    --menu-bg: rgba(250, 250, 250, 0.85);
+    --shadow: rgba(0, 0, 0, 0.12);
+    --orb-opacity: 0.08;
+    --grain-opacity: 0.025;
+  }
+
+  /* ── Dark theme ── */
+  [data-theme="dark"] {
+    --bg: #0a0a0a;
+    --bg-secondary: #141414;
+    --fg: #f5f0e8;
+    --fg-secondary: #8a8078;
+    --accent: #f97316;
+    --accent-hover: #ea6c10;
+    --muted: #5a5550;
+    --card: #141414;
+    --card-hover: #1c1c1c;
+    --border: rgba(255, 255, 255, 0.07);
+    --border-hover: rgba(255, 255, 255, 0.14);
+    --nav-bg: rgba(30, 30, 30, 0.65);
+    --menu-bg: rgba(20, 20, 20, 0.85);
+    --shadow: rgba(0, 0, 0, 0.6);
+    --orb-opacity: 0.06;
+    --grain-opacity: 0.04;
+  }
+
+  /* Smooth transition on theme switch */
+  *,
+  *::before,
+  *::after {
+    transition:
+      background-color 0.3s ease,
+      border-color 0.3s ease,
+      color 0.3s ease,
+      box-shadow 0.3s ease;
+  }
+
+  /* Exclude animations from transition override */
+  .no-transition {
+    transition: none !important;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--fg);
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Grain pseudo-element (from user prompt) */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9998;
+    pointer-events: none;
+    background-image: url('/noise.png');
+    /* Assumes a noise.png exists */
+    background-repeat: repeat;
+    opacity: var(--grain-opacity);
+  }
+}
+
+/* Custom Cursor */
+#cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  background-color: var(--color-accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: width 0.2s ease, height 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+#cursor.hover-state {
+  width: 48px;
+  height: 48px;
+  background-color: rgba(249, 115, 22, 0.15);
+  border: 1.5px solid var(--color-accent);
+}
+
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #050505;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #222;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #444;
+}
+
+/* Lenis */
+html.lenis {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+html {
+  scroll-behavior: auto;
+}
