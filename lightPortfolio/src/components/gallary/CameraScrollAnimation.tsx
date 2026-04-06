@@ -16,31 +16,56 @@ export default function CameraScrollAnimation() {
   useEffect(() => {
     let loadedCount = 0;
     const loadedImages: HTMLImageElement[] = [];
+    let isMounted = true;
 
-    for (let i = 0; i < FRAME_COUNT; i++) {
-      const img = new Image();
-      img.src = `/sequence/frames_${String(i + 1).padStart(5, '0')}.png`;
-      img.onload = () => {
-        loadedCount++;
-        loadedImages[i] = img;
-        setProgress((loadedCount / FRAME_COUNT) * 100);
+    const loadBatch = async (startIdx: number, batchSize: number) => {
+      const promises = [];
+      for (let i = startIdx; i < Math.min(startIdx + batchSize, FRAME_COUNT); i++) {
+        promises.push(new Promise<void>((resolve) => {
+          const img = new Image();
+          img.src = `/sequence/frames_${String(i + 1).padStart(5, '0')}.png`;
+          
+          const handleComplete = () => {
+            if (!isMounted) return resolve();
+            loadedCount++;
+            loadedImages[i] = img;
+            setProgress((loadedCount / FRAME_COUNT) * 100);
+            
+            // Unblock UI after the first 30 frames are ready to allow instant interaction
+            if (loadedCount === 30) {
+              setImages([...loadedImages]);
+              setIsLoading(false);
+            }
+            resolve();
+          };
 
-        if (loadedCount === FRAME_COUNT) {
-          setImages(loadedImages);
-          setIsLoading(false);
-        }
-      };
-      img.onerror = () => {
-        console.error(`Failed to load frame ${i}`);
-        loadedCount++;
-        if (loadedCount === FRAME_COUNT) {
-          setImages(loadedImages);
-          setIsLoading(false);
+          img.onload = handleComplete;
+          img.onerror = handleComplete; // graceful fallback
+        }));
+      }
+      await Promise.all(promises);
+    };
+
+    const processQueue = async () => {
+      // Load in batches of 10 to avoid freezing the browser main thread
+      for (let i = 0; i < FRAME_COUNT; i += 10) {
+        if (!isMounted) break;
+        await loadBatch(i, 10);
+        // Only update the actual images array incrementally to save React renders
+        if (i % 50 === 0 && !isLoading && isMounted) {
+          setImages([...loadedImages]);
         }
       }
-    }
+      if (isMounted) {
+        setImages([...loadedImages]);
+        if (isLoading) setIsLoading(false); // Failsafe
+      }
+    };
+
+    processQueue();
 
     return () => {
+      isMounted = false;
       loadedImages.forEach(img => { img.onload = null; img.onerror = null; });
     };
   }, []);
@@ -85,7 +110,21 @@ function CameraScrollContent({ images }: { images: HTMLImageElement[] }) {
     if (!context) return;
 
     const img = images[index];
-    if (!img) return;
+    // Fail gracefully if scroll goes faster than chunks load, displaying latest loaded frame
+    if (!img || !img.complete) {
+      let closestLoaded = index;
+      while (closestLoaded >= 0 && (!images[closestLoaded] || !images[closestLoaded].complete)) {
+        closestLoaded--;
+      }
+      if (closestLoaded >= 0) {
+        const fallback = images[closestLoaded];
+        if (fallback) {
+           fallback.width && context.drawImage(fallback, 0, 0); // Temporary paint to avoid flickering
+           return;
+        }
+      }
+      return;
+    }
 
     // HD 4K Retina Display Scaling
     const dpr = window.devicePixelRatio || 1;

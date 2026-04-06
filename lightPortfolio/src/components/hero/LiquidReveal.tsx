@@ -69,6 +69,15 @@ export default function LiquidReveal({ frontImage, backImage }: LiquidRevealProp
     let lastMouseY = 0;
     let time = 0;
     let hovering = false;
+    let isVisible = false;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisible = entry.isIntersecting;
+      },
+      { threshold: 0 }
+    );
+    observer.observe(container);
 
     // Handle Resize
     const resizeObserver = new ResizeObserver((entries) => {
@@ -122,6 +131,11 @@ export default function LiquidReveal({ frontImage, backImage }: LiquidRevealProp
       time += 0.016;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (!isVisible && splats.length === 0) {
+        animationFrameId = requestAnimationFrame(render);
+        return;
+      }
 
       if (splats.length === 0) {
         animationFrameId = requestAnimationFrame(render);
@@ -222,6 +236,7 @@ export default function LiquidReveal({ frontImage, backImage }: LiquidRevealProp
 
     return () => {
       cancelAnimationFrame(animationFrameId);
+      observer.disconnect();
       resizeObserver.disconnect();
       container.removeEventListener('mousemove', handleMouseMove);
       container.removeEventListener('mouseenter', handleMouseEnter);
