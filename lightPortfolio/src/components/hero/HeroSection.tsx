@@ -24,16 +24,34 @@ export default function HeroSection() {
   const rightColRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    let animationFrameId: number;
+    let targetX = 0;
+    let targetY = 0;
+    let currentX = 0;
+    let currentY = 0;
+
     const handleMouseMove = (e: MouseEvent) => {
-      if (!rightColRef.current) return;
-      const { clientX, clientY } = e;
-      const x = (clientX / window.innerWidth - 0.5) * 16; // ~8px parallax
-      const y = (clientY / window.innerHeight - 0.5) * 12; // ~6px parallax
-      rightColRef.current.style.transform = `translate(${x}px, ${y}px)`;
+      targetX = (e.clientX / window.innerWidth - 0.5) * 16;
+      targetY = (e.clientY / window.innerHeight - 0.5) * 12;
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    const updatePosition = () => {
+      if (rightColRef.current) {
+        currentX += (targetX - currentX) * 0.1;
+        currentY += (targetY - currentY) * 0.1;
+        // Hardware accelerated interpolation
+        rightColRef.current.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+      }
+      animationFrameId = requestAnimationFrame(updatePosition);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    updatePosition();
+    
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      cancelAnimationFrame(animationFrameId);
+    };
   }, []);
 
   return (

@@ -23,13 +23,13 @@ export default function CustomCursor() {
       cursorX += (targetX - cursorX) * 0.2;
       cursorY += (targetY - cursorY) * 0.2;
 
-      cursor.style.transform = `translate(${cursorX - 5}px, ${cursorY - 5}px)`;
+      cursor.style.transform = `translate3d(${cursorX - 5}px, ${cursorY - 5}px, 0)`;
 
       requestRef = requestAnimationFrame(updateCursor);
     };
 
     requestRef = requestAnimationFrame(updateCursor);
-    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mousemove', onMouseMove, { passive: true });
 
     // Hover logic
     const handleMouseOver = (e: MouseEvent) => {

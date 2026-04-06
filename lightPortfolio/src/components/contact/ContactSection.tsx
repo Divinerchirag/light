@@ -132,6 +132,7 @@ export default function ContactSection() {
           filter: "blur(100px)",
           animation: "oc 10s ease-in-out infinite alternate",
           pointerEvents: "none",
+          willChange: "transform",
         }}
       />
       {/* Top-left orb */}
@@ -148,6 +149,7 @@ export default function ContactSection() {
           filter: "blur(75px)",
           animation: "otl 14s ease-in-out infinite alternate",
           pointerEvents: "none",
+          willChange: "transform",
         }}
       />
       {/* Bottom-right orb */}
@@ -164,6 +166,7 @@ export default function ContactSection() {
           filter: "blur(70px)",
           animation: "obr 12s ease-in-out infinite alternate",
           pointerEvents: "none",
+          willChange: "transform",
         }}
       />
 
